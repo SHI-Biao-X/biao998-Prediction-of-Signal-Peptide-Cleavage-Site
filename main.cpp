@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "Dataset.hpp"
 #include "PositionScoringMatrix.hpp"
 #include "ConfusionMatrix.hpp"
@@ -16,6 +17,30 @@ void evalPositionScoringMatrix(Dataset test_dataset, PositionScoringMatrix myMat
     }
 
     myCM.PrintEvaluation();
+}
+
+void toSVM(Dataset dataset, int p, int q, const char* output_file){
+
+    std::ofstream outfile;
+    outfile.open(output_file, std::ios::out | std::ios::trunc );
+
+    for(int i=0; i<dataset.GetNbrSequences(); i++){
+        int cleavage = dataset.GetCleavage(i);
+        std::string sequence = dataset.GetSequence(i);
+        for(int j=1 + p; j + q - 1 < sequence.size(); j++){
+            std::string line;
+            if(j == cleavage) line = "1 ";
+            else line = "-1 ";
+            for(int k=0; k< p+q; k++){
+                int a = (sequence[j-p + k] - 'A') + k*26 + 1;
+                line += std::to_string(a);
+                line += ":1.00 ";
+            }
+            outfile << line << std::endl;
+        }
+    }
+
+    outfile.close();
 }
 
 int main(int argc, char* argv[]) {
@@ -43,4 +68,7 @@ int main(int argc, char* argv[]) {
     std::cout << myMatrix.prediction(test_data, avg_score) << std::endl;
 
     evalPositionScoringMatrix(GS_13_test, myMatrix, avg_score);
+
+    toSVM(GS_13_train, 13, 2, "./GRAM+SIG_13_train.svm");
+    toSVM(GS_13_test, 13, 2, "./GRAM+SIG_13_test.svm");
 }
