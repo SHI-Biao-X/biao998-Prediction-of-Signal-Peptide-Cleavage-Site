@@ -44,7 +44,7 @@ void toSVM(Dataset dataset, int p, int q, const char* output_file){
 }
 
 int main(int argc, char* argv[]) {
-    Dataset GS_13("./GRAM+SIG_13.red.txt");
+    Dataset GS_13("./data/GRAM+SIG_13.red.txt");
     std::cout << GS_13.GetSequence(0) << std::endl;
     std::cout << GS_13.GetCleavage(0) << std::endl;
     Dataset GS_13_train(GS_13, true, 0.8);
@@ -69,6 +69,6 @@ int main(int argc, char* argv[]) {
 
     evalPositionScoringMatrix(GS_13_test, myMatrix, avg_score);
 
-    toSVM(GS_13_train, 13, 2, "./GRAM+SIG_13_train.svm");
-    toSVM(GS_13_test, 13, 2, "./GRAM+SIG_13_test.svm");
+    toSVM(GS_13_train, 13, 2, "./data/GRAM+SIG_13_train.svm");
+    toSVM(GS_13_test, 13, 2, "./data/GRAM+SIG_13_test.svm");
 }
