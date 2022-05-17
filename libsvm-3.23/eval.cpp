@@ -19,7 +19,7 @@ double accuracy(const size_t, const double *dec_values, const int *ty);
 
 // Evaluation function pointer
 // You can assign this pointer to any above prototype
-double (*evaluation_function)(const size_t, const double *, const int *) = accuracy;
+double (*evaluation_function)(const size_t, const double *, const int *) = fscore;
 
 bool check_binary_beforeCV(const struct svm_problem *prob, int *ty);
 

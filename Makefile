@@ -1,9 +1,9 @@
 CXX = g++
-CXXFLAGS = --std=c++11
+CXXFLAGS = --std=c++11 -U__STRICT_ANSI__
 
 .PHONY: all clean
 
-all: grader
+all: main
 
 # Specific part
 
@@ -22,11 +22,11 @@ ConfusionMatrix.o: ConfusionMatrix.cpp ConfusionMatrix.hpp
 SOURCES_COMMON = main.cpp
 OBJECTS_COMMON = main.o
 
-grader: $(OBJECTS_COMMON) $(OBJECTS_SPECIFIC)
-	$(CXX) $(CXXFLAGS) -o grader $(OBJECTS_COMMON) $(OBJECTS_SPECIFIC)
+main: $(OBJECTS_COMMON) $(OBJECTS_SPECIFIC)
+	$(CXX) $(CXXFLAGS) -o main $(OBJECTS_COMMON) $(OBJECTS_SPECIFIC)
 
 main.o: main.cpp 
 	$(CXX) -c $(CXXFLAGS) -o main.o main.cpp
 
 clean:
-	del /F grader.exe *.o
+	del /F main.exe *.o

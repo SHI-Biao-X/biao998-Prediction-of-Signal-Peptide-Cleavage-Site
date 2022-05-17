@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+*_kernels_test.svm
+*_kernels_train.svm
