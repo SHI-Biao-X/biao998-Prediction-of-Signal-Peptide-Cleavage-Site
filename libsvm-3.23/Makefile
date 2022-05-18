@@ -19,7 +19,7 @@ svm-train: svm-train.c svm.o eval.o SubstitutionMatrix.o
 	$(CXX) $(CFLAGS) svm-train.c svm.o eval.o SubstitutionMatrix.o -o svm-train -lm
 svm-scale: svm-scale.c
 	$(CXX) $(CFLAGS) svm-scale.c -o svm-scale
-svm.o: svm.cpp svm.h 
+svm.o: SubstitutionMatrix.hpp svm.cpp svm.h 
 	$(CXX) $(CFLAGS) -c svm.cpp
 eval.o: eval.cpp eval.h svm.h
 	$(CXX) $(CFLAGS) -c eval.cpp -o eval.o

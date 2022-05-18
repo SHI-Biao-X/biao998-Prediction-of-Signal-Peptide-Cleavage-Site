@@ -29,6 +29,8 @@ void exit_with_help()
 	"	3 -- sigmoid: tanh(gamma*u'*v + coef0)\n"
 	"	4 -- precomputed kernel (kernel values in training_set_file)\n"
 	// Add rational-quadratic kernel here
+	"	5 -- rational-quadratic kernel\n"
+	"	6 -- similarity score kernel\n"
 	"-d degree : set degree in kernel function (default 3)\n"
 	"-g gamma : set gamma in kernel function (default 1/num_features)\n"
 	"-r coef0 : set coef0 in kernel function (default 0)\n"

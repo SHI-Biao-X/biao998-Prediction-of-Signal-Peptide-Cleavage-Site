@@ -103,7 +103,7 @@ void findCandGamma(const char* train_file, int kernel_type, std::vector<double> 
     double max_c = 1;
     double max_g = 0;
 
-    if(kernel_type == 0 || kernel_type == 4)
+    if(kernel_type == 0 || kernel_type == 4 || kernel_type == 6)
     {
         if(!L_g.empty()) {
             std::cout << "Error: L_g is not empty" << std::endl;
@@ -137,7 +137,7 @@ void findCandGamma(const char* train_file, int kernel_type, std::vector<double> 
         return;
     }
 
-    else if(kernel_type == 2)
+    else if(kernel_type == 2 || kernel_type == 7)
     {
         if(L_g.empty()) {
             std::cout << "Error: L_g is empty" << std::endl;
@@ -303,6 +303,12 @@ int main(int argc, char* argv[]) {
     // max c = 8, max g = 0.0625, max Fscore = 0.453488
 */
 
+    //similarity score matrix
+
+    std::vector<double> L_c({pow(2,1),pow(2,2),pow(2,3),pow(2,4)});
+    findCandGamma("./data/p6q2/GRAM+SIG_13_train.svm", 1, L_c);
+    // max c = 8, max g = 0.0625, max Fscore = 0.453488
+
     // proba kernel
 /*
     std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
@@ -310,9 +316,10 @@ int main(int argc, char* argv[]) {
     // max c = 0.5, max Fscore = 0.427861
 */
 
-    std::vector<double> L_c({pow(2,-4),pow(2,-3),pow(2,-2),pow(2,-1)});
+/*    std::vector<double> L_c({pow(2,-4),pow(2,-3),pow(2,-2),pow(2,-1)});
     findCandGamma("./data/p6q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
     // max c = 0.5, max Fscore = 0.427861
+*/
 
 
 

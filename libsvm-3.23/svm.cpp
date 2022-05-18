@@ -59,6 +59,8 @@ static void info(const char *fmt,...)
 static void info(const char *fmt,...) {}
 #endif
 
+SubstitutionMatrix *matrix = new SubstitutionMatrix("../BLOSUM62.txt"); //the similarty score matrix
+
 //
 // Kernel Cache
 //
@@ -221,6 +223,7 @@ protected:
 private:
 	const svm_node **x;
 	double *x_square;
+	
 
 	// svm_parameter
 	const int kernel_type;
@@ -229,6 +232,7 @@ private:
 	const double coef0;
 
 	static double dot(const svm_node *px, const svm_node *py);
+	static double pseudo_dot(const svm_node *px, const svm_node *py);
 	double kernel_linear(int i, int j) const
 	{
 		return dot(x[i],x[j]);
@@ -256,21 +260,11 @@ private:
 	}
 	double kernel_substitution_matrix(int i, int j) const
 	{
-		double sum = 0;
-		SubstitutionMatrix matrix = SubstitutionMatrix("BLOSUM62.txt");
-		for (int k = 0; k < 15; k++) {
-			int letter_i, letter_j;
-			for (int l = 0; l < 26; l++) {
-				if (x[i][k * 26 + l].value == 1) {
-					letter_i = l;
-				}
-				if (x[j][k * 26 + l].value == 1) {
-					letter_j = l;
-				}
-			}
-			sum += matrix.GetScore(matrix.GetLetterPosition(letter_i), matrix.GetLetterPosition(letter_j));
-		}
-		return sum;
+		return pseudo_dot(x[i], x[j]);
+	}
+	double kernel_pseudo_rbf(int i, int j) const
+	{
+		return exp(-gamma*(pseudo_dot(x[i], x[i])+pseudo_dot(x[j], x[j])-2*pseudo_dot(x[i],x[j])));
 	}
 };
 
@@ -298,8 +292,13 @@ Kernel::Kernel(int l, svm_node * const * x_, const svm_parameter& param)
 		// Add rational-quadratic kernel here
 		case RATQUAD:
 			kernel_function = &Kernel::kernel_rational_quadratic;
+			break;
 		case SUBMATRIX:
 			kernel_function = &Kernel::kernel_substitution_matrix;
+			break;
+		case PSEUDORBF:
+			kernel_function = &Kernel::kernel_pseudo_rbf;
+			break;
 	}
 
 	clone(x,x_,l);
@@ -340,6 +339,18 @@ double Kernel::dot(const svm_node *px, const svm_node *py)
 			else
 				++px;
 		}
+	}
+	return sum;
+}
+
+double Kernel::pseudo_dot(const svm_node *px, const svm_node *py)
+{
+	double sum = 0;
+	while(px->index != -1 && py->index != -1)
+	{
+		sum += matrix->GetScore(matrix->GetLetterPosition((px->index-1) % matrix->GetNbrAlphabet()), matrix->GetLetterPosition((py->index-1) % matrix->GetNbrAlphabet()));
+		++px;
+		++py;
 	}
 	return sum;
 }
@@ -442,21 +453,11 @@ double Kernel::k_function(const svm_node *x, const svm_node *y,
 		}
 		case SUBMATRIX:
 		{
-		double sum = 0;
-		SubstitutionMatrix matrix = SubstitutionMatrix("BLOSUM62.txt");
-		for (int k = 0; k < 15; k++) {
-			int letter_i, letter_j;
-			for (int l = 0; l < 26; l++) {
-				if (x[k * 26 + l].value == 1) {
-					letter_i = l;
-				}
-				if (y[k * 26 + l].value == 1) {
-					letter_j = l;
-				}
-			}
-			sum += matrix.GetScore(matrix.GetLetterPosition(letter_i), matrix.GetLetterPosition(letter_j));
+			return pseudo_dot(x, y);
 		}
-		return sum;
+		case PSEUDORBF:
+		{
+			return exp(-param.gamma*(pseudo_dot(x, x)+pseudo_dot(y, y)-2*pseudo_dot(x,y)));
 		}
 		default:
 			return 0;  // Unreachable
@@ -2732,7 +2733,7 @@ static const char *svm_type_table[] =
 
 static const char *kernel_type_table[]=
 {
-	"linear","polynomial","rbf","sigmoid","precomputed","rational_quadratic","substitution matrix",
+	"linear","polynomial","rbf","sigmoid","precomputed","rational_quadratic","substitution_matrix","pseudo_rbf",
 	// Add rational-quadratic kernel here for display purposes
 	NULL
 };
@@ -2756,7 +2757,7 @@ int svm_save_model(const char *model_file_name, const svm_model *model)
 	if(param.kernel_type == POLY)
 		fprintf(fp,"degree %d\n", param.degree);
 
-	if(param.kernel_type == POLY || param.kernel_type == RBF || param.kernel_type == SIGMOID)
+	if(param.kernel_type == POLY || param.kernel_type == RBF || param.kernel_type == SIGMOID || param.kernel_type == PSEUDORBF)
 		fprintf(fp,"gamma %.17g\n", param.gamma);
 
 	if(param.kernel_type == POLY || param.kernel_type == SIGMOID || param.kernel_type == RATQUAD
@@ -3159,7 +3160,8 @@ const char *svm_check_parameter(const svm_problem *prob, const svm_parameter *pa
 	   kernel_type != SIGMOID &&
 	   kernel_type != PRECOMPUTED &&
 	   kernel_type != RATQUAD &&
-	   kernel_type != SUBMATRIX
+	   kernel_type != SUBMATRIX &&
+	   kernel_type != PSEUDORBF
 	   // Allow for rational-quadratic kernel here
 	   )
 		return "unknown kernel type";
