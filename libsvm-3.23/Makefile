@@ -13,15 +13,18 @@ lib: svm.o
 	fi; \
 	$(CXX) $${SHARED_LIB_FLAG} svm.o -o libsvm.so.$(SHVER)
 
-svm-predict: svm-predict.c svm.o eval.o
-	$(CXX) $(CFLAGS) svm-predict.c svm.o eval.o -o svm-predict -lm
-svm-train: svm-train.c svm.o eval.o
-	$(CXX) $(CFLAGS) svm-train.c svm.o eval.o -o svm-train -lm
+svm-predict: svm-predict.c svm.o eval.o SubstitutionMatrix.o
+	$(CXX) $(CFLAGS) svm-predict.c svm.o eval.o SubstitutionMatrix.o -o svm-predict -lm
+svm-train: svm-train.c svm.o eval.o SubstitutionMatrix.o
+	$(CXX) $(CFLAGS) svm-train.c svm.o eval.o SubstitutionMatrix.o -o svm-train -lm
 svm-scale: svm-scale.c
 	$(CXX) $(CFLAGS) svm-scale.c -o svm-scale
-svm.o: svm.cpp svm.h
+svm.o: svm.cpp svm.h 
 	$(CXX) $(CFLAGS) -c svm.cpp
 eval.o: eval.cpp eval.h svm.h
 	$(CXX) $(CFLAGS) -c eval.cpp -o eval.o
+
+SubstitutionMatrix.o: SubstitutionMatrix.cpp SubstitutionMatrix.hpp
+	$(CXX) -c $(CFLAGS) -o $@ $<
 clean:
 	rm -f *~ svm.o eval.o svm-train svm-predict svm-scale libsvm.so.$(SHVER)
