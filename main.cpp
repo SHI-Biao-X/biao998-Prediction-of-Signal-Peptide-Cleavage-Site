@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdio>
 #include <memory>
-#include <stdexcept>
+#include <cmath>
 #include "Dataset.hpp"
 #include "PositionScoringMatrix.hpp"
 #include "ConfusionMatrix.hpp"
@@ -98,10 +98,10 @@ void findPAndQ(Dataset train_dataset, Dataset test_dataset, std::vector<int> L_p
     std::cout << "max p = " << max_p << ", max q = " << max_q << ", max Fscore = " << max_f_score << std::endl;
 }
 
-void findCandGamma(const char* train_file, int kernel_type, std::vector<int> L_c, std::vector<int> L_g = {}){
+void findCandGamma(const char* train_file, int kernel_type, std::vector<double> L_c, std::vector<double> L_g = {}){
     double max_f_score = 0;
-    int max_c = 1;
-    int max_g = 0;
+    double max_c = 1;
+    double max_g = 0;
 
     if(kernel_type == 0 || kernel_type == 4)
     {
@@ -124,7 +124,7 @@ void findCandGamma(const char* train_file, int kernel_type, std::vector<int> L_c
             found1 += 2;
             std::size_t found2 = output.find("%", found1);
 
-            float f_score = std::stod(output.substr(found1, found2 - found1));
+            float f_score = std::stod(output.substr(found1, found2 - found1))/100;
             if(f_score > max_f_score){
                 max_f_score = f_score;
                 max_c = L_c[i];
@@ -162,7 +162,7 @@ void findCandGamma(const char* train_file, int kernel_type, std::vector<int> L_c
                 found1 += 2;
                 std::size_t found2 = output.find("%", found1);
 
-                float f_score = std::stod(output.substr(found1, found2 - found1));
+                float f_score = std::stod(output.substr(found1, found2 - found1))/100;
                 if(f_score > max_f_score){
                     max_f_score = f_score;
                     max_c = L_c[i];
@@ -173,7 +173,7 @@ void findCandGamma(const char* train_file, int kernel_type, std::vector<int> L_c
             }
         }
 
-        std::cout << "max c = " << max_c << "max g = " << max_g <<", max Fscore = " << max_f_score << std::endl;
+        std::cout << "max c = " << max_c << ", max g = " << max_g <<", max Fscore = " << max_f_score << std::endl;
         return;
     }
     
@@ -191,6 +191,8 @@ int main(int argc, char* argv[]) {
     // std::cout << GS_13.GetCleavage(0) << std::endl;
     Dataset GS_13_train(GS_13, true, 0.8);
     Dataset GS_13_test(GS_13, false, 0.8);
+
+    //Fonction test
     /*
     std::cout << GS_13_train.GetSequence(0) << std::endl;
     std::cout << GS_13_train.GetCleavage(0) << std::endl;
@@ -218,15 +220,25 @@ int main(int argc, char* argv[]) {
     myMatrix.matrixToSVM("./data/GRAM+SIG_13_kernels_train.svm");
     myMatrix.matrixTestToSVM(GS_13_test, "./data/GRAM+SIG_13_kernels_test.svm");
     */
-/*
+
     // find best p and q
+/*
     std::vector<int> L_p({8,9,10,11,12,13});
     std::vector<int> L_q({1,2,3,4,5,6,7});
 
     findPAndQ(GS_13_train, GS_13_test, L_p, L_q);
+    // max p = 8, max q = 2, max Fscore = 0.36
 */
 /*
+    std::vector<int> L_p({4,5,6,7,8,9});
+    std::vector<int> L_q({1,2,3,4});
+
+    findPAndQ(GS_13_train, GS_13_test, L_p, L_q);
+    // max p = 6, max q = 2, max Fscore = 0.421053
+*/
+
     // prepare data for p = 8, q = 2
+/*
     encodingToSVM(GS_13_train, 8, 2, "./data/p8q2/GRAM+SIG_13_train.svm");
     encodingToSVM(GS_13_test, 8, 2, "./data/p8q2/GRAM+SIG_13_test.svm");
 
@@ -236,8 +248,72 @@ int main(int argc, char* argv[]) {
     myMatrix.matrixTestToSVM(GS_13_test, "./data/p8q2/GRAM+SIG_13_kernels_test.svm");
 */
 
-    std::vector<int> L_c({8,9,10,11,12,13});
-    std::vector<int> L_g({1,2,3,4,5,6,7});
+    // prepare data for p = 6, q = 2
+/*
+    encodingToSVM(GS_13_train, 6, 2, "./data/p6q2/GRAM+SIG_13_train.svm");
+    encodingToSVM(GS_13_test, 6, 2, "./data/p6q2/GRAM+SIG_13_test.svm");
+
+    PositionScoringMatrix myMatrix(&GS_13_train, 6, 2, 0.001);
+
+    myMatrix.matrixToSVM("./data/p6q2/GRAM+SIG_13_kernels_train.svm");
+    myMatrix.matrixTestToSVM(GS_13_test, "./data/p6q2/GRAM+SIG_13_kernels_test.svm");
+*/
+
+
+    // p = 8, q = 2
+    //rbf
+/*
+    std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
+    std::vector<double> L_g({pow(2,-13),pow(2,-9),pow(2,-5),pow(2,-1)});
     findCandGamma("./data/p8q2/GRAM+SIG_13_train.svm", 2, L_c, L_g);
+    // max c = 4, max g = 0.03125, max Fscore = 0.312057
+*/
+/*
+    std::vector<double> L_c({pow(2,1),pow(2,2),pow(2,3),pow(2,4)});
+    std::vector<double> L_g({pow(2,-6),pow(2,-5),pow(2,-4),pow(2,-3)});
+    findCandGamma("./data/p8q2/GRAM+SIG_13_train.svm", 2, L_c, L_g);
+    // max c = 8, max g = 0.03125, max Fscore = 0.434783
+*/
+
+    // proba kernel
+/*
+    std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
+    findCandGamma("./data/p8q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
+    // max c = 0.5, max Fscore = 0.383178
+*/
+/*
+    std::vector<double> L_c({pow(2,-4),pow(2,-3),pow(2,-2),pow(2,-1)});
+    findCandGamma("./data/p8q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
+    // max c = 0.125, max Fscore = 0.404494
+*/
+
+
+    // p = 6, q = 2
+    //rbf
+/*
+    std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
+    std::vector<double> L_g({pow(2,-13),pow(2,-9),pow(2,-5),pow(2,-1)});
+    findCandGamma("./data/p6q2/GRAM+SIG_13_train.svm", 2, L_c, L_g);
+    // max c = 4, max g = 0.03125, max Fscore = 0.186047
+*/
+/*
+    std::vector<double> L_c({pow(2,1),pow(2,2),pow(2,3),pow(2,4)});
+    std::vector<double> L_g({pow(2,-6),pow(2,-5),pow(2,-4),pow(2,-3)});
+    findCandGamma("./data/p6q2/GRAM+SIG_13_train.svm", 2, L_c, L_g);
+    // max c = 8, max g = 0.0625, max Fscore = 0.453488
+*/
+
+    // proba kernel
+/*
+    std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
+    findCandGamma("./data/p6q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
+    // max c = 0.5, max Fscore = 0.427861
+*/
+
+    std::vector<double> L_c({pow(2,-4),pow(2,-3),pow(2,-2),pow(2,-1)});
+    findCandGamma("./data/p6q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
+    // max c = 0.5, max Fscore = 0.427861
+
+
 
 }
