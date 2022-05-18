@@ -59,7 +59,7 @@ static void info(const char *fmt,...)
 static void info(const char *fmt,...) {}
 #endif
 
-SubstitutionMatrix *matrix = new SubstitutionMatrix("../BLOSUM62.txt"); //the similarty score matrix
+SubstitutionMatrix *matrix = new SubstitutionMatrix("./BLOSUM62.txt"); //the similarty score matrix
 
 //
 // Kernel Cache
