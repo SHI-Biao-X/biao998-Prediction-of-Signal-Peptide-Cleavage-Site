@@ -23,7 +23,7 @@ struct svm_problem
 };
 
 enum { C_SVC, NU_SVC, ONE_CLASS, EPSILON_SVR, NU_SVR };	/* svm_type */
-enum { LINEAR, POLY, RBF, SIGMOID, PRECOMPUTED, RATQUAD
+enum { LINEAR, POLY, RBF, SIGMOID, PRECOMPUTED, RATQUAD, SUBMATRIX
 // Add rational-quadratic kernel here
 }; /* kernel_type */
 

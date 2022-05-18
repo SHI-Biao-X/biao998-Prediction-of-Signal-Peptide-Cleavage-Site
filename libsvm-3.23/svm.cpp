@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <locale.h>
 #include "svm.h"
+#include "SubstitutionMatrix.hpp"
 int libsvm_version = LIBSVM_VERSION;
 typedef float Qfloat;
 typedef signed char schar;
@@ -253,6 +254,24 @@ private:
 	{
 		return coef0/(x_square[i]+x_square[j]-2*dot(x[i],x[j])+coef0);
 	}
+	double kernel_substitution_matrix(int i, int j) const
+	{
+		double sum = 0;
+		SubstitutionMatrix matrix = SubstitutionMatrix("BLOSUM62.txt");
+		for (int k = 0; k < 15; k++) {
+			int letter_i, letter_j;
+			for (int l = 0; l < 26; l++) {
+				if (x[i][k * 26 + l].value == 1) {
+					letter_i = l;
+				}
+				if (x[j][k * 26 + l].value == 1) {
+					letter_j = l;
+				}
+			}
+			sum += matrix.GetScore(matrix.GetLetterPosition(letter_i), matrix.GetLetterPosition(letter_j));
+		}
+		return sum;
+	}
 };
 
 Kernel::Kernel(int l, svm_node * const * x_, const svm_parameter& param)
@@ -279,6 +298,8 @@ Kernel::Kernel(int l, svm_node * const * x_, const svm_parameter& param)
 		// Add rational-quadratic kernel here
 		case RATQUAD:
 			kernel_function = &Kernel::kernel_rational_quadratic;
+		case SUBMATRIX:
+			kernel_function = &Kernel::kernel_substitution_matrix;
 	}
 
 	clone(x,x_,l);
@@ -418,6 +439,24 @@ double Kernel::k_function(const svm_node *x, const svm_node *y,
 			}
 
 			return param.coef0/(sum+param.coef0);
+		}
+		case SUBMATRIX:
+		{
+		double sum = 0;
+		SubstitutionMatrix matrix = SubstitutionMatrix("BLOSUM62.txt");
+		for (int k = 0; k < 15; k++) {
+			int letter_i, letter_j;
+			for (int l = 0; l < 26; l++) {
+				if (x[k * 26 + l].value == 1) {
+					letter_i = l;
+				}
+				if (y[k * 26 + l].value == 1) {
+					letter_j = l;
+				}
+			}
+			sum += matrix.GetScore(matrix.GetLetterPosition(letter_i), matrix.GetLetterPosition(letter_j));
+		}
+		return sum;
 		}
 		default:
 			return 0;  // Unreachable
@@ -2693,7 +2732,7 @@ static const char *svm_type_table[] =
 
 static const char *kernel_type_table[]=
 {
-	"linear","polynomial","rbf","sigmoid","precomputed","rational_quadratic",
+	"linear","polynomial","rbf","sigmoid","precomputed","rational_quadratic","substitution matrix",
 	// Add rational-quadratic kernel here for display purposes
 	NULL
 };
@@ -3119,7 +3158,8 @@ const char *svm_check_parameter(const svm_problem *prob, const svm_parameter *pa
 	   kernel_type != RBF &&
 	   kernel_type != SIGMOID &&
 	   kernel_type != PRECOMPUTED &&
-	   kernel_type != RATQUAD
+	   kernel_type != RATQUAD &&
+	   kernel_type != SUBMATRIX
 	   // Allow for rational-quadratic kernel here
 	   )
 		return "unknown kernel type";

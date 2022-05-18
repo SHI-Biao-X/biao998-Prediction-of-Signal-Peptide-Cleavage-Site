@@ -13,6 +13,7 @@ SubstitutionMatrix::SubstitutionMatrix (const char* file) {
 
     //alphabet.resize(nbr_alphabet);
     s_matrix.resize(nbr_alphabet);
+    alphabet = new int[nbr_alphabet];
 
     ifstream input;
     input.open(file);
@@ -29,11 +30,14 @@ SubstitutionMatrix::SubstitutionMatrix (const char* file) {
     char *alphab = (char *)line.c_str();
     char *letter = strtok(alphab, " ");
     int ord;
+    int position = 0;
     while (letter != NULL) {
         //cout << letter << ' ';
         ord = (int)(*letter - 'A');
-        alphabet.push_back(ord);
+        if (ord < nbr_alphabet && 0 <= ord)
+            alphab[ord] = position;
         letter = strtok(NULL, " ");
+        position++;
     }
 
     int row = 0;
@@ -58,7 +62,7 @@ int SubstitutionMatrix::GetNbrAlphabet() const {
     return nbr_alphabet;
 }
 
-int SubstitutionMatrix::GetLetter(int i) const {
+int SubstitutionMatrix::GetLetterPosition(int i) const {
     return alphabet[i];
 }
 int SubstitutionMatrix::GetScore(int i, int j) const {

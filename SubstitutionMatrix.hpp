@@ -23,7 +23,7 @@ class SubstitutionMatrix {
 
         int GetScore(int i, int j) const;
 
-        int GetLetter(int i) const;
+        int GetLetterPosition(int i) const;
 
     private : 
         /**
@@ -39,7 +39,7 @@ class SubstitutionMatrix {
         /**
             The order of the letters in the alphabet
         */
-        vector<int> alphabet;
+        int *alphabet;
 
 };
 
