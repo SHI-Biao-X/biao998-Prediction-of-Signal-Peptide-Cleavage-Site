@@ -33,3 +33,5 @@
 
 *_kernels_test.svm
 *_kernels_train.svm
+
+.vscode

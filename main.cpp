@@ -20,7 +20,7 @@ double evalPositionScoringMatrix(Dataset test_dataset, PositionScoringMatrix myM
         }
     }
 
-    // myCM.PrintEvaluation();
+    myCM.PrintEvaluation();
     return myCM.f_score();
 }
 
@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
     Dataset GS_13_test(GS_13, false, 0.8);
 
     //Fonction test
-    /*
+/*
     std::cout << GS_13_train.GetSequence(0) << std::endl;
     std::cout << GS_13_train.GetCleavage(0) << std::endl;
     std::cout << GS_13_test.GetSequence(0) << std::endl;
@@ -219,7 +219,7 @@ int main(int argc, char* argv[]) {
 
     myMatrix.matrixToSVM("./data/GRAM+SIG_13_kernels_train.svm");
     myMatrix.matrixTestToSVM(GS_13_test, "./data/GRAM+SIG_13_kernels_test.svm");
-    */
+*/
 
     // find best p and q
 /*
@@ -262,12 +262,12 @@ int main(int argc, char* argv[]) {
 
     // p = 8, q = 2
     //rbf
-/*
+
     std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
     std::vector<double> L_g({pow(2,-13),pow(2,-9),pow(2,-5),pow(2,-1)});
-    findCandGamma("./data/p8q2/GRAM+SIG_13_train.svm", 2, L_c, L_g);
+    findCandGamma("./data/p8q2/GRAM+SIG_13_train.svm", 7, L_c, L_g);
     // max c = 4, max g = 0.03125, max Fscore = 0.312057
-*/
+
 /*
     std::vector<double> L_c({pow(2,1),pow(2,2),pow(2,3),pow(2,4)});
     std::vector<double> L_g({pow(2,-6),pow(2,-5),pow(2,-4),pow(2,-3)});
@@ -303,24 +303,17 @@ int main(int argc, char* argv[]) {
     // max c = 8, max g = 0.0625, max Fscore = 0.453488
 */
 
-    //similarity score matrix
-
-    std::vector<double> L_c({pow(2,1),pow(2,2),pow(2,3),pow(2,4)});
-    findCandGamma("./data/p6q2/GRAM+SIG_13_train.svm", 1, L_c);
-    // max c = 8, max g = 0.0625, max Fscore = 0.453488
-
     // proba kernel
 /*
     std::vector<double> L_c({pow(2,-1),pow(2,0),pow(2,1),pow(2,2)});
     findCandGamma("./data/p6q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
     // max c = 0.5, max Fscore = 0.427861
 */
-
-/*    std::vector<double> L_c({pow(2,-4),pow(2,-3),pow(2,-2),pow(2,-1)});
+/*
+    std::vector<double> L_c({pow(2,-4),pow(2,-3),pow(2,-2),pow(2,-1)});
     findCandGamma("./data/p6q2/GRAM+SIG_13_kernels_train.svm", 4, L_c);
     // max c = 0.5, max Fscore = 0.427861
 */
-
 
 
 }
